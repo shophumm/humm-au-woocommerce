@@ -1,8 +1,8 @@
 <?php
 /*
- * Plugin Name: Humm / Oxipay Payment Gateway
+ * Plugin Name: Humm
  * Plugin URI: https://www.shophumm.com.au
- * Description: In Australia - <a href="https://www.shophumm.com.au"><strong>humm</strong></a>, In New Zealand - <a href="https://www.oxipay.com.au">Oxipay</a>.
+ * Description: In Australia - <a href="https://www.shophumm.com.au"><strong>humm</strong></a>
  * Version:           2.0.0
  * Author:            flexigroup
  * Author URI:
