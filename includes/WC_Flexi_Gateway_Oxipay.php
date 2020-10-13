@@ -646,10 +646,10 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     public function payment_fields()
     {
-        /*
+
         $country_domain = (isset($this->settings['country']) && $this->settings['country'] == 'NZ') ? 'co.nz' : 'com.au';
         $checkout_total = (WC()->cart) ? WC()->cart->get_totals()['total'] : "0";
-        if (($this->currentConfig->getDisplayName() == 'Humm')|| ( $this->currentConfig->getDisplayName() == 'Oxipay' )){
+        if (($this->currentConfig->getDisplayName() == 'Humm')){
             $widget_type = 'price-info';
             $merchant_type = "&" . $this->settings['merchant_type'];
             if ($merchant_type == '&both') {
@@ -657,12 +657,12 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
             }
             $this->description = __('<div id="checkout_method_humm_anchor"></div><script src="https://widgets.shophumm.' . $country_domain . '/content/scripts/' . $widget_type . '.js?used_in=checkout&productPrice=' . $checkout_total . '&element=%23checkout_method_humm_anchor' . $merchant_type . '"></script>', 'WooCommerce');
         }
-        else {
-            $widget_type = (isset($this->settings['country']) && $this->settings['country'] == 'NZ') ? 'payments' : 'payments-weekly';
-            $this->description = __('<div id="checkout_method_oxipay_anchor"></div><script src="https://widgets.oxipay.' . $country_domain . '/content/scripts/' . $widget_type . '.js?used_in=checkout&productPrice=' . $checkout_total . '&element=%23checkout_method_oxipay_anchor"></script>', 'woocommerce');
-        }
+//        else {
+//            $widget_type = (isset($this->settings['country']) && $this->settings['country'] == 'NZ') ? 'payments' : 'payments-weekly';
+//            $this->description = __('<div id="checkout_method_oxipay_anchor"></div><script src="https://widgets.oxipay.' . $country_domain . '/content/scripts/' . $widget_type . '.js?used_in=checkout&productPrice=' . $checkout_total . '&element=%23checkout_method_oxipay_anchor"></script>', 'woocommerce');
+//        }
         echo $this->description;
-        */
+
     }
 
     /**
