@@ -170,7 +170,6 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
             $script .= '"></script>';
 
         }
-            var_dump($script);
             if (floatval($displayPrice) <= floatval($thresholdPrice))
                return $script;
            }
