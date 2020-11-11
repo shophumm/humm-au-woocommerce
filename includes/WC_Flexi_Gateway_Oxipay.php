@@ -183,6 +183,13 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
                 'default' => 'yes',
                 'description' => 'Display a price widget in each product page.',
             ),
+            'cart_widget' => array(
+                'title' => __('Cart Widget', 'woocommerce'),
+                'type' => 'checkbox',
+                'label' => __('Enable the ' . $this->pluginDisplayName . ' Cart Widget', 'woocommerce'),
+                'default' => 'yes',
+                'description' => 'Display a Cart widget in each cart page.',
+            ),
             'price_widget_advanced' => array(
                 'title' => __('Price Widget Advanced Settings', 'woocommerce'),
                 'type' => 'checkbox',

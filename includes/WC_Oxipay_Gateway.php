@@ -135,7 +135,7 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
                 if (isset($this->settings['price_widget_price_selector'])) {
                     $selector = $this->settings['price_widget_price_selector'];
                 } else {
-                    $selector = '.price .woocommerce-Price-amount.amount';
+                    $selector = '.price.woocommerce-Price-amount.amount';
                 }
                 $script .= 'price-selector=' . urlencode($selector);
             } else {
@@ -170,6 +170,7 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
             $script .= '"></script>';
 
         }
+            var_dump($script);
             if (floatval($displayPrice) <= floatval($thresholdPrice))
                return $script;
            }
@@ -182,7 +183,7 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
     {
         global $woocommerce;
         $ec_identity = 'little';
-        if ($this->settings['enabled'] == 'yes' && isset($this->settings['price_widget']) && $this->settings['price_widget'] == 'yes') {
+        if ($this->settings['enabled'] == 'yes' && isset($this->settings['cart_widget']) && $this->settings['cart_widget'] == 'yes') {
             $threshold_price = $this->getThreshold();
             $cart_total = $woocommerce->cart->total;
             if (is_cart()) {
