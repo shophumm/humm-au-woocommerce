@@ -947,7 +947,6 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
     function payment_finalisation($order_id)
     {
         $msg = "";
-//      $this->log(sprintf("%s===%s===%s",$order_id,$_SERVER['REQUEST_METHOD'],$_SERVER['REQUEST_URI']));
         $order = wc_get_order($order_id);
         $isAsyncCallback = $_SERVER['REQUEST_METHOD'] === "POST" ? true : false;
         if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
@@ -1109,7 +1108,6 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         }
         return $original_message;
     }
-
     /**
      * This is a filter setup to override the title on the order received page
      * in the case where the payment has failed
