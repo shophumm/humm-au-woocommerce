@@ -656,7 +656,7 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
         $country_domain = (isset($this->settings['country']) && $this->settings['country'] == 'NZ') ? 'co.nz' : 'com.au';
         $checkout_total = (WC()->cart) ? WC()->cart->get_totals()['total'] : "0";
-        if (($this->currentConfig->getDisplayName() == 'Humm')){
+        if (($this->currentConfig->getDisplayName() == 'Humm')) {
             $widget_type = 'price-info';
             $merchant_type = "&" . $this->settings['merchant_type'];
             if ($merchant_type == '&both') {
@@ -945,39 +945,41 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     function payment_finalisation($order_id)
     {
-        $msg = "";
         $order = wc_get_order($order_id);
         $isAsyncCallback = $_SERVER['REQUEST_METHOD'] === "POST" ? true : false;
+        if (empty($order)) {
+            $this->log(sprintf('unable to get order information for orderId: %s, (isAsyncCallback=%s)', $order_id, $isAsyncCallback));
+            return $order_id;
+        }
         if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
             WC()->session->set('flexi_result_note', '');
             $this->log(sprintf('No action required. orderId: %s is not a %s order, (isAsyncCallback=%s)', $order_id, $this->pluginDisplayName, $isAsyncCallback));
             return $order_id;
         }
-        if ($isAsyncCallback) {
-            $params = $_POST;
-        } else {
-            $scheme = 'http';
-            if (!empty($_SERVER['HTTPS'])) {
-                $scheme = 'https';
-            }
-            $full_url = sprintf(
-                '%s://%s%s',
-                $scheme,
-                $_SERVER['HTTP_HOST'],
-                $_SERVER['REQUEST_URI']
-            );
-            $parts = parse_url($full_url, PHP_URL_QUERY);
-            parse_str($parts, $params);
-        }
 
-        $this->log(sprintf("params====%s",json_encode($params)));
+        $params = $this->getParams($isAsyncCallback);
 
-        if (empty($order)) {
-            $this->log(sprintf('unable to get order information for orderId: %s, (isAsyncCallback=%s)', $order_id, $isAsyncCallback));
+        $this->log(sprintf("params====%s", json_encode($params)));
+
+        if (isset($params['x_result']) && ($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error')) {
+            $this->complete_order($params, $order, $order_id, $isAsyncCallback);
             return $order_id;
+        } else {
+            $this->call_redirect($order, $order_id);
         }
 
-        if (($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error') ) {
+    }
+
+    /**
+     * @param $params
+     * @param $order
+     * @param $isAsyncCallback
+     * @return mixed
+     */
+    function complete_order($params, $order, $order_id, $isAsyncCallback)
+    {
+
+        if (($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error')) {
             $cart = WC()->cart;
             $api_key = $this->settings[$this->pluginFileName . '_api_key'];
             $sig_exists = isset($params['x_signature']);
@@ -1039,57 +1041,63 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
             }
             return $order_id;
         }
-        else {
-            $callbackURL = $this->get_return_url($order);
-            $gatewayUrl = $this->getGatewayUrl();
-            $transaction_details = array(
-                'x_reference' => $order_id,
-                'x_account_id' => $this->settings[$this->pluginFileName . '_merchant_id'],
-                'x_amount' => $order->get_total(),
-                'x_currency' => $this->getCurrencyCode(),
-                'x_url_callback' => $callbackURL,
-                'x_url_complete' => $callbackURL,
-                'x_url_cancel' => $order->get_checkout_payment_url(),
-                'x_test' => 'false',
-                'x_shop_country' => $this->getCountryCode(),
-                'x_shop_name' => $this->settings['shop_name'],
-                //customer detail
-                'x_customer_first_name' => $order->get_billing_first_name(),
-                'x_customer_last_name' => $order->get_billing_last_name(),
-                'x_customer_email' => $order->get_billing_email(),
-                'x_customer_phone' => $order->get_billing_phone(),
-                //billing detail
-                'x_customer_billing_country' => $order->get_billing_country(),
-                'x_customer_billing_city' => $order->get_billing_city(),
-                'x_customer_billing_address1' => $order->get_billing_address_1(),
-                'x_customer_billing_address2' => $order->get_billing_address_2(),
-                'x_customer_billing_state' => $order->get_billing_state(),
-                'x_customer_billing_zip' => $order->get_billing_postcode(),
-                //shipping detail
-                'x_customer_shipping_country' => $order->get_billing_country(),
-                'x_customer_shipping_city' => $order->get_shipping_city(),
-                'x_customer_shipping_address1' => $order->get_shipping_address_1(),
-                'x_customer_shipping_address2' => $order->get_shipping_address_2(),
-                'x_customer_shipping_state' => $order->get_shipping_state(),
-                'x_customer_shipping_zip' => $order->get_shipping_postcode(),
-                'version_info' => 'humm_' . $this->currentConfig->getPluginVersion() . '_on_wc' . substr(WC()->version, 0, 3),
-                'gateway_url' => $gatewayUrl
-            );
-            $signature = $this->flexi_sign($transaction_details, $this->settings[$this->pluginFileName . '_api_key']);
-            $transaction_details['x_signature'] = $signature;
-            try {
-                $formItem = '';
-                $beforeForm = sprintf("%s", "<html> <body> <form id='form' action='$gatewayUrl' method='post'>");
-                foreach ($transaction_details as $key => $value) {
-                    $formItem = sprintf("%s %s", $formItem, sprintf("<input type='hidden' id='%s' name='%s' value='%s'/>", $key, $key, htmlspecialchars($value, ENT_QUOTES)));
-                }
-                $afterForm = sprintf("%s", '</form> </body> <script> var form = document.getElementById("form");form.submit();</script></html>');
-                $postForm = sprintf("%s %s %s", $beforeForm, $formItem, $afterForm);
-                $this->log(sprintf("%s", $postForm));
-                echo $postForm;
-            } catch (Exception $e) {
-                $this->log(sprintf("PostFormErrors=%s", $e->getMessage()));
+    }
+
+    /**
+     * @param $order
+     * @param $order_id
+     */
+    function call_redirect($order, $order_id)
+    {
+        $callbackURL = $this->get_return_url($order);
+        $gatewayUrl = $this->getGatewayUrl();
+        $transaction_details = array(
+            'x_reference' => $order_id,
+            'x_account_id' => $this->settings[$this->pluginFileName . '_merchant_id'],
+            'x_amount' => $order->get_total(),
+            'x_currency' => $this->getCurrencyCode(),
+            'x_url_callback' => $callbackURL,
+            'x_url_complete' => $callbackURL,
+            'x_url_cancel' => $order->get_checkout_payment_url(),
+            'x_test' => 'false',
+            'x_shop_country' => $this->getCountryCode(),
+            'x_shop_name' => $this->settings['shop_name'],
+            //customer detail
+            'x_customer_first_name' => $order->get_billing_first_name(),
+            'x_customer_last_name' => $order->get_billing_last_name(),
+            'x_customer_email' => $order->get_billing_email(),
+            'x_customer_phone' => $order->get_billing_phone(),
+            //billing detail
+            'x_customer_billing_country' => $order->get_billing_country(),
+            'x_customer_billing_city' => $order->get_billing_city(),
+            'x_customer_billing_address1' => $order->get_billing_address_1(),
+            'x_customer_billing_address2' => $order->get_billing_address_2(),
+            'x_customer_billing_state' => $order->get_billing_state(),
+            'x_customer_billing_zip' => $order->get_billing_postcode(),
+            //shipping detail
+            'x_customer_shipping_country' => $order->get_billing_country(),
+            'x_customer_shipping_city' => $order->get_shipping_city(),
+            'x_customer_shipping_address1' => $order->get_shipping_address_1(),
+            'x_customer_shipping_address2' => $order->get_shipping_address_2(),
+            'x_customer_shipping_state' => $order->get_shipping_state(),
+            'x_customer_shipping_zip' => $order->get_shipping_postcode(),
+            'version_info' => 'humm_' . $this->currentConfig->getPluginVersion() . '_on_wc' . substr(WC()->version, 0, 3),
+            'gateway_url' => $gatewayUrl
+        );
+        $signature = $this->flexi_sign($transaction_details, $this->settings[$this->pluginFileName . '_api_key']);
+        $transaction_details['x_signature'] = $signature;
+        try {
+            $formItem = '';
+            $beforeForm = sprintf("%s", "<html> <body> <form id='form' action='$gatewayUrl' method='post'>");
+            foreach ($transaction_details as $key => $value) {
+                $formItem = sprintf("%s %s", $formItem, sprintf("<input type='hidden' id='%s' name='%s' value='%s'/>", $key, $key, htmlspecialchars($value, ENT_QUOTES)));
             }
+            $afterForm = sprintf("%s", '</form> </body> <script> var form = document.getElementById("form");form.submit();</script></html>');
+            $postForm = sprintf("%s %s %s", $beforeForm, $formItem, $afterForm);
+            $this->log(sprintf("%s", $postForm));
+            echo $postForm;
+        } catch (Exception $e) {
+            $this->log(sprintf("PostFormErrors=%s", $e->getMessage()));
         }
     }
 
@@ -1107,6 +1115,33 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         }
         return $original_message;
     }
+
+    /**
+     * @param $isAsyncCallback
+     * @return mixed
+     */
+    function getParams($isAsyncCallback)
+    {
+
+        if ($isAsyncCallback) {
+            $params = $_POST;
+        } else {
+            $scheme = 'http';
+            if (!empty($_SERVER['HTTPS'])) {
+                $scheme = 'https';
+            }
+            $full_url = sprintf(
+                '%s://%s%s',
+                $scheme,
+                $_SERVER['HTTP_HOST'],
+                $_SERVER['REQUEST_URI']
+            );
+            $parts = parse_url($full_url, PHP_URL_QUERY);
+            parse_str($parts, $params);
+        }
+        return $params;
+    }
+
     /**
      * This is a filter setup to override the title on the order received page
      * in the case where the payment has failed
@@ -1263,9 +1298,6 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         return isset($this->settings[$thresholdAmount]) ? $this->settings[$thresholdAmount] : 0;
     }
 
-    /**
-     * Load javascript for Wordpress admin
-     */
     abstract public function admin_scripts();
 
     /**
