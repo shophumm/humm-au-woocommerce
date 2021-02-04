@@ -57,7 +57,6 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
         }
         if ($show_times < 3 && $this->settings['country'] == 'AU') {
             update_option('humm_admin_notice_update_show_times', $show_times + 1);
-//          printf('<div class="notice notice-info is-dismissible"><p><strong>humm</strong> <img alt="humm logo" src="https://widgets.shophumm.com.au/content/images/logo-orange.svg" height="16px" /> is the new Oxipay!</p></div>');
         }
     }
 
@@ -66,13 +65,6 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
      */
     function flexi_enqueue_script()
     {
-//        wp_register_script('oxipay_gateway', plugins_url('/assets/js/oxipay.js', __FILE__), array('jquery'), '0.4.5');
-//        wp_register_script('oxipay_modal', plugins_url('/assets/js/oxipay_modal.js', __FILE__), array('jquery'), '0.4.5');
-//        wp_localize_script('oxipay_modal', 'php_vars', ['plugin_url' => plugins_url("", __FILE__)]);
-//        wp_register_script('iframeResizer', plugins_url('/assets/js/resizer/iframeResizer.js', __FILE__), array('jquery'), '0.4.5');
-//        wp_enqueue_script('oxipay_gateway');
-//        wp_enqueue_script('oxipay_modal');
-//        wp_enqueue_script('iframeResizer');
     }
 
     /**
@@ -205,7 +197,6 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
             }
         }
     }
-
     /**
      * add_price_widget_anchor()
      */

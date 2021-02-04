@@ -967,7 +967,6 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         } else {
             $this->call_redirect($order, $order_id);
         }
-
     }
 
     /**
@@ -1122,7 +1121,6 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     function getParams($isAsyncCallback)
     {
-
         if ($isAsyncCallback) {
             $params = $_POST;
         } else {
@@ -1153,18 +1151,24 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
     function order_received_title($title)
     {
         global $wp_query;
+        global $wp;
 
+        $order_id = apply_filters('woocommerce_thankyou_order_id', absint($wp->query_vars['order-received']));
+        $order = wc_get_order($order_id);
+        $endpoint = WC()->query->get_current_endpoint();
         if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url()) {
-            $endpoint = WC()->query->get_current_endpoint();
             if ($endpoint == 'order-received' && !empty($_GET['x_result'])) {
-                //look at the x_result query var. Ideally we'd load the order and look at the status, but this has not been updated when this filter runs
                 if ($_GET['x_result'] == 'failed') {
                     $title = 'Payment Failed';
+                } elseif ($_GET['x_result'] == 'completed')
+                    $title = 'Order Received ';
+            } else {
+                if ($order->get_data()['payment_method'] === $this->pluginFileName) {
+                    $title = "Proceed to Humm";
                 }
             }
             remove_filter('the_title', array($this, 'order_received_title'), 11);
         }
-
         return $title;
     }
 
