@@ -959,7 +959,7 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
         $params = $this->getParams($isAsyncCallback);
 
-        $this->log(sprintf("params====%s", json_encode($params)));
+        $this->log(sprintf("params_________%s", json_encode($params)));
 
         if (isset($params['x_result']) && ($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error')) {
             $this->complete_order($params, $order, $order_id, $isAsyncCallback);
@@ -1152,26 +1152,13 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
     {
         global $wp_query;
         global $wp;
-
-        $order_id = apply_filters('woocommerce_thankyou_order_id', absint($wp->query_vars['order-received']));
-        $order = wc_get_order($order_id);
         $endpoint = WC()->query->get_current_endpoint();
-        if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url()) {
-            if ($endpoint == 'order-received' && !empty($_GET['x_result'])) {
-                if ($_GET['x_result'] == 'failed') {
+        if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() && ($endpoint == 'order-received') ) {
+            if (!empty($_GET['x_result']) && ($_GET['x_result'] == 'failed'))
                     $title = 'Payment Failed';
-                } elseif ($_GET['x_result'] == 'completed')
-                    $title = 'Order Received ';
-            } else {
-                if ($order->get_data()['payment_method'] === $this->pluginFileName) {
-                    $title = "Proceed to Humm";
-                }
-            }
-            remove_filter('the_title', array($this, 'order_received_title'), 11);
         }
         return $title;
     }
-
     /**
      * @param string $feature
      * @return bool
