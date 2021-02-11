@@ -1151,12 +1151,26 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
     function order_received_title($title)
     {
         global $wp_query;
-        global $wp;
-        $endpoint = WC()->query->get_current_endpoint();
-        if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() && ($endpoint == 'order-received') ) {
-            if (!empty($_GET['x_result']) && ($_GET['x_result'] == 'failed'))
+        try {
+            if (!is_wc_endpoint_url('order-received') || empty($_GET['key'])) {
+                return $title;
+            }
+            $order_id = wc_get_order_id_by_order_key($_GET['key']);
+            $order = wc_get_order($order_id);
+            if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
+                return $title;
+            }
+            $endpoint = WC()->query->get_current_endpoint();
+            if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() && ($endpoint == 'order-received')) {
+                if (empty($_GET['x_result'])){
+                    $title = 'Redirect to  Humm Payment ...';
+                }
+                if (!empty($_GET['x_result']) && ($_GET['x_result'] == 'failed'))
                     $title = 'Payment Failed';
-        }
+              }
+             }catch (Exception $e) {
+               $this->log(sprintf("%s in the order_received_title",$e->getMessage()));
+           }
         return $title;
     }
     /**
