@@ -678,7 +678,7 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         $order_id = trim(str_replace('#', '', $order->get_order_number()));
         if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
             WC()->session->set('flexi_result_note', '');
-            $this->log(sprintf('No Humm required. orderId: %s is not a %s order ', $order_id, $this->pluginDisplayName));
+            $this->log(sprintf('No Humm Payment. orderId: %s is not a %s order ', $order_id, $this->pluginDisplayName));
             $re = false;
         }
         return $re;
@@ -694,11 +694,9 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     function process_payment($order_id)
     {
+        $this->log("start process_payment...");
         $isValid = true;
         $order = new WC_Order($order_id);
-        if(!$this->validateHummOrder($order)){
-            return array();
-        }
         $gatewayUrl = $this->getGatewayUrl();
         $isValid = $isValid && $this->verifyConfiguration($order);
         $isValid = $isValid && $this->checkCustomerLocation($order);
@@ -963,6 +961,7 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     function payment_finalisation($order_id)
     {
+        $this->log("payment_finalisation");
         $order = wc_get_order($order_id);
         $isAsyncCallback = $_SERVER['REQUEST_METHOD'] === "POST" ? true : false;
         if (empty($order)) {
@@ -1103,11 +1102,11 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         $transaction_details['x_signature'] = $signature;
         try {
             $formItem = '';
-            $beforeForm = sprintf("%s", "<html> <body> <form id='form' action='$gatewayUrl' method='post'>");
+            $beforeForm = sprintf("%s", "<html> <body> <form id='humm-form' action='$gatewayUrl' method='post'>");
             foreach ($transaction_details as $key => $value) {
                 $formItem = sprintf("%s %s", $formItem, sprintf("<input type='hidden' id='%s' name='%s' value='%s'/>", $key, $key, htmlspecialchars($value, ENT_QUOTES)));
             }
-            $afterForm = sprintf("%s", '</form> </body> <script> var form = document.getElementById("form");form.submit();</script></html>');
+            $afterForm = sprintf("%s", '</form> </body> <script> var form = document.getElementById("humm-form");form.submit();</script></html>');
             $postForm = sprintf("%s %s %s", $beforeForm, $formItem, $afterForm);
             $this->log(sprintf("%s", $postForm));
             echo $postForm;
