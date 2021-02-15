@@ -160,3 +160,6 @@ Fixed an issue with empty_cart()
 * Added readme.txt file
 
 ==2.0.0 =   May 2020
+
+==2.1.0 =  May 2020
+Change workflow and redirect as well as a few UI
