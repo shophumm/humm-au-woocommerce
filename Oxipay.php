@@ -3,7 +3,7 @@
  * Plugin Name: Humm
  * Plugin URI: https://www.shophumm.com.au
  * Description: In Australia - <a href="https://www.shophumm.com.au"><strong>humm</strong></a>
- * Version:           2.0.0
+ * Version:           2.1.0
  * Author:            flexigroup
  * Author URI:
  * License:           GPL-2.0+
@@ -11,7 +11,7 @@
  * Github URI:
  * WC requires at least:
  * WC tested up to:
- * @version  2.0.0
+ * @version  2.1.0
  * @package  flexigroup
  * @author   flexigroup
  * package WordPress
