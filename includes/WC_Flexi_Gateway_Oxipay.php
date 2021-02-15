@@ -669,6 +669,22 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
     }
 
     /**
+     * @param $order
+     * @param bool $re
+     * @return bool
+     */
+
+    public function validateHummOrder($order,$re=true) {
+        $order_id = trim(str_replace('#', '', $order->get_order_number()));
+        if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
+            WC()->session->set('flexi_result_note', '');
+            $this->log(sprintf('No Humm required. orderId: %s is not a %s order ', $order_id, $this->pluginDisplayName));
+            $re = false;
+        }
+        return $re;
+    }
+
+    /**
      * Generates the payment gateway request parameters and signature and redirects to the
      * payment gateway through the invisible processing.php form
      *
@@ -678,14 +694,16 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
      */
     function process_payment($order_id)
     {
-        $order = new WC_Order($order_id);
-        $gatewayUrl = $this->getGatewayUrl();
         $isValid = true;
+        $order = new WC_Order($order_id);
+        if(!$this->validateHummOrder($order)){
+            return array();
+        }
+        $gatewayUrl = $this->getGatewayUrl();
         $isValid = $isValid && $this->verifyConfiguration($order);
         $isValid = $isValid && $this->checkCustomerLocation($order);
         $isValid = $isValid && $this->checkOrderAmount($order);
         $isValid = $isValid && !is_null($gatewayUrl) && $gatewayUrl != '';
-
         if (!$isValid) {
             return array();
         }
@@ -951,9 +969,7 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
             $this->log(sprintf('unable to get order information for orderId: %s, (isAsyncCallback=%s)', $order_id, $isAsyncCallback));
             return $order_id;
         }
-        if ($order->get_data()['payment_method'] !== $this->pluginFileName) {
-            WC()->session->set('flexi_result_note', '');
-            $this->log(sprintf('No action required. orderId: %s is not a %s order, (isAsyncCallback=%s)', $order_id, $this->pluginDisplayName, $isAsyncCallback));
+        if (!$this->validateHummOrder($order)){
             return $order_id;
         }
 
@@ -1162,17 +1178,18 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
             }
             $endpoint = WC()->query->get_current_endpoint();
             if (!is_null($wp_query) && !is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() && ($endpoint == 'order-received')) {
-                if (empty($_GET['x_result'])){
+                if (empty($_GET['x_result'])) {
                     $title = 'Redirect to  Humm Payment ...';
                 }
                 if (!empty($_GET['x_result']) && ($_GET['x_result'] == 'failed'))
                     $title = 'Payment Failed';
-              }
-             }catch (Exception $e) {
-               $this->log(sprintf("%s in the order_received_title",$e->getMessage()));
-           }
+            }
+        } catch (Exception $e) {
+            $this->log(sprintf("%s in the order_received_title", $e->getMessage()));
+        }
         return $title;
     }
+
     /**
      * @param string $feature
      * @return bool
