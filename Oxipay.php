@@ -1,10 +1,10 @@
 <?php
 /*
- * Plugin Name: Humm
+ * Plugin Name: HummPayment
  * Plugin URI: https://www.shophumm.com.au
- * Description: In Australia - <a href="https://www.shophumm.com.au"><strong>humm</strong></a>
+ * Description: In Australia - <a href="https://www.shophumm.com.au"><strong>hummpayment</strong></a>
  * Version:           2.1.0
- * Author:            flexigroup
+ * Author:            HummGroup
  * Author URI:
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
@@ -12,10 +12,10 @@
  * WC requires at least:
  * WC tested up to:
  * @version  2.1.0
- * @package  flexigroup
- * @author   flexigroup
+ * @package  HummGroup
+ * @author   HummGroup
  * package WordPress
- * author FlexiGroup
+ * author HummGroup
  * since 0.4.8
  */
 
