@@ -10,7 +10,7 @@
 https://github.com/shophumm/humm-au-woocommerce/blob/master/woocommerce-specification.pdf
 
 for reference:
-* [**Humm** AU](https://docs.shophumm.com.au/platforms/woocommerce/)
+* [**Humm Payment** AU](https://docs.shophumm.com.au/platforms/woocommerce/)
 
 ## Issues
 

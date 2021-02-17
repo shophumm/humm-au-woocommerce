@@ -1,14 +1,14 @@
 
 ==2.1.0=  Jan 2021
 
-Rebuilt Checkout and remove call outside redirect php code
+Rebuild Checkout and remove call outside redirect php code
 
 Roger.bi@flexigroup.com.au
 
 
 ==2.0.0=  May 2020
 
-Rebuilt plugins
+Rebuild plugins
 
 Roger.bi@felxigroup.com.au
 
