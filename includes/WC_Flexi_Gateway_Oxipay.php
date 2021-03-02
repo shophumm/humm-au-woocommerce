@@ -976,11 +976,15 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
         $this->log(sprintf("params_________%s", json_encode($params)));
 
-        if (isset($params['x_result']) && ($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error')) {
-            $this->complete_order($params, $order, $order_id, $isAsyncCallback);
-            return $order_id;
-        } else {
-            $this->call_redirect($order, $order_id);
+        if (isset($params['x_result'])) {
+            if (($params['x_result'] == 'completed') || ($params['x_result'] == 'failed') || ($params['x_result'] == 'error')) {
+                $this->complete_order($params, $order, $order_id, $isAsyncCallback);
+                return $order_id;
+            }
+        }
+        else {
+            if($params["key"])
+                $this->call_redirect($order, $order_id);
         }
     }
 
