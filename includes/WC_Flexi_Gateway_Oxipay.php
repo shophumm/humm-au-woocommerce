@@ -112,8 +112,8 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
         $merchantTypes = array(
             'both' => __('both (default)', 'woocommerce'),
-            'BigThings' => 'BigThings only',
-            'LittleThings' => 'LittleThings only',
+            'BigThings' => 'BigThings',
+            'LittleThings' => 'LittleThings',
         );
 
         $this->form_fields = array(
@@ -1322,6 +1322,22 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
         $thresholdAmount = sprintf('%s_thresholdAmount', $this->pluginFileName);
         return isset($this->settings[$thresholdAmount]) ? $this->settings[$thresholdAmount] : 0;
     }
+
+    /**
+     * @return int
+     */
+
+
+    function getMerchandId()
+    {
+        $merchantId = sprintf('%s_merchant_id', $this->pluginFileName);
+        return $this->settings[$merchantId];
+    }
+
+    /**
+     * @return mixed
+     */
+
 
     abstract public function admin_scripts();
 

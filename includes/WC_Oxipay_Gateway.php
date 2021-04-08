@@ -93,78 +93,63 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
     function get_widget_script()
     {
         global $product;
-        $threshold = array("little" => "&LittleThings", "big" => "&BigThings");
         $thresholdPrice = $this->getThreshold();
+        $merchantId = sprintf("&merchantId=%s",$this->getMerchandId());
+
         if (is_product()) {
             $displayPrice = wc_get_price_to_display($product);
         }
-        $script ='';
+        $script = '';
         if ($this->settings['country'] == 'NZ') {
             if ($this->settings['enabled'] == 'yes' && isset($this->settings['price_widget']) && $this->settings['price_widget'] == 'yes') {
                 if (floatval($displayPrice) <= floatval($thresholdPrice)) {
                     $ec_pattern = sprintf("%s%s%s%s", '<script src= "https://widgets.shophumm.co.nz/content/scripts/price-info.js?productPrice=', $displayPrice, '&LittleThings&little=F5&element=%23Humm-price-info-anchor', '"></script>');
                     $ec_pattern = $ec_pattern . sprintf("%s%s%s%s", '<script src= "https://widgets.shophumm.co.nz/content/scripts/price-info.js?productPrice=', $displayPrice, '&LittleThings&little=w10&element=%23Humm-price-info-anchor', '"></script>');
-                }
-                else {
+                } else {
                     $ec_pattern = sprintf("%s%s%s%s", '<script src= "https://widgets.shophumm.co.nz/content/scripts/price-info.js?productPrice=', $displayPrice, '&big=M6&element=%23Humm-price-info-anchor', '"></script>');
                 }
                 return $ec_pattern;
             }
-        }
-        else if ($this->settings['country'] == 'AU'){
-          if ($this->settings['enabled'] == 'yes' && isset($this->settings['price_widget']) && $this->settings['price_widget'] == 'yes') {
-            $country_domain = 'shophumm.com.au';
-            $maximum = $this->getMaxPrice();
-            $name = 'Humm';
-            $advanced = isset($this->settings['price_widget_advanced']) && $this->settings['price_widget_advanced'] === 'yes';
-            $script = '<script ';
-            if ($maximum > 0)
-                $script .= 'data-max="' . $maximum . '" ';
-            $script .= 'src="https://widgets.' . $country_domain . '/content/scripts/';
-            $script .= $name === 'Humm' ? 'price-info' : 'payments';
-            $script .= '.js?';
-            if ($advanced && isset($this->settings['price_widget_dynamic_enabled']) && $this->settings['price_widget_dynamic_enabled'] === 'yes') {
-                if (isset($this->settings['price_widget_price_selector'])) {
-                    $selector = $this->settings['price_widget_price_selector'];
+        } else if ($this->settings['country'] == 'AU') {
+            if ($this->settings['enabled'] == 'yes' && isset($this->settings['price_widget']) && $this->settings['price_widget'] == 'yes') {
+                $maximum = $this->getMaxPrice();
+                $name = 'Humm';
+                $advanced = isset($this->settings['price_widget_advanced']) && $this->settings['price_widget_advanced'] === 'yes';
+                $script = '<script ';
+                if ($maximum > 0)
+                    $script .= 'data-max="' . $maximum . '" ';
+                $script .= 'src="https://bpi.humm-au.com/au/content/scripts/price-info_sync.js?';
+                if ($advanced && isset($this->settings['price_widget_dynamic_enabled']) && $this->settings['price_widget_dynamic_enabled'] === 'yes') {
+                    if (isset($this->settings['price_widget_price_selector'])) {
+                        $selector = $this->settings['price_widget_price_selector'];
+                    } else {
+                        $selector = '.price.woocommerce-Price-amount.amount';
+                    }
+                    $script .= 'price-selector=' . urlencode($selector);
                 } else {
-                    $selector = '.price.woocommerce-Price-amount.amount';
+                    $script .= 'productPrice=' . $displayPrice;
                 }
-                $script .= 'price-selector=' . urlencode($selector);
-            } else {
-                $script .= 'productPrice=' . $displayPrice;
-            }
 
-            $bigThing = '';
-
-            if (floatval($displayPrice) <= floatval($thresholdPrice)) {
-                $script .= $threshold['little'];
-            } else {
-                self::$littleBigFlag = true;
-                $script = '<div id="BigThing"></div>' . $script;
-                $script .= $threshold['big'];
-            }
-            $script .= '&element=';
-            if ($advanced && isset($this->settings['price_widget_element_selector']) && $this->settings['price_widget_element_selector'] !== '') {
-                $script .= urlencode($this->settings['price_widget_element_selector']);
-            } else {
-                if ($bigThing)
-                    $script .= '%23' . 'BigThing';
+                $script .= '&element=';
+                if ($advanced && isset($this->settings['price_widget_element_selector']) && $this->settings['price_widget_element_selector'] !== '')
+                    $script .= urlencode($this->settings['price_widget_element_selector']);
                 else
                     $script .= '%23' . $name . '-price-info-anchor';
+
+
+                if ($name === 'Humm') {
+                    $merchant_type = "&" . $this->settings['merchant_type'];
+                    if ($merchant_type !== '&both')
+                        $script .= $merchant_type;
+                }
+
+                $script .= $merchantId;
+
+                $script .= '"></script>';
+
             }
-
-            if ($name === 'Humm') {
-                $merchant_type = "&" . $this->settings['merchant_type'];
-                if ($merchant_type !== '&both')
-                    $script .= $merchant_type;
-            }
-
-            $script .= '"></script>';
-
+            return $script;
         }
-            if (floatval($displayPrice) <= floatval($thresholdPrice))
-               return $script;
-           }
     }
 
     /**
@@ -202,20 +187,7 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
      */
     function add_price_widget_anchor()
     {
-        global $product;
         echo '<div id="Humm-price-info-anchor"></div>';
-        if ($this->settings['country'] == 'AU') {
-            if ($this->settings['enabled'] == 'yes' && isset($this->settings['price_widget']) && $this->settings['price_widget'] == 'yes') {
-                $thresholdPrice = $this->getThreshold();
-                if (is_product()) {
-                    $displayPrice = wc_get_price_to_display($product);
-                }
-                if (floatval($displayPrice) >= floatval($thresholdPrice)) {
-                    $ec = '<div id="testBig"></div>' . '<script src =' . '" https://widgets.shophumm.com.au/content/scripts/price-info.js?productPrice=' . "<?php echo $displayPrice ?>" . '&BigThings&element=%23testBig' . '"></script>';
-                    echo $ec;
-                }
-            }
-        }
     }
 
     /**
