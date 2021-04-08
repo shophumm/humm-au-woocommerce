@@ -83,7 +83,6 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
      */
     function add_price_widget()
     {
-        var_dump($this->get_widget_script());
         echo $this->get_widget_script();
     }
 
