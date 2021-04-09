@@ -168,8 +168,9 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
                     $ec_pattern = sprintf("%s%s%s", '<script src =" https://bpi.humm-au.com/au/content/scripts/price-info_sync.js?productPrice=', $cart_total, $merchantId);
                     if ($merchant_type !== '&both')
                         $ec_pattern = sprintf("%s%s%s",$ec_pattern,$merchant_type,'"></script>');
-                    else
-                        $ec_pattern = sprintf("%s%s%",$ec_pattern,'"></script>');
+                    else {
+                        $ec_pattern = sprintf("%s%s", $ec_pattern, '"></script>');
+                    }
                     echo $ec_pattern;
                 }
                 else if ( $this->settings['country'] == 'NZ') {

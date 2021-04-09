@@ -656,13 +656,14 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
         $country_domain = (isset($this->settings['country']) && $this->settings['country'] == 'NZ') ? 'co.nz' : 'com.au';
         $checkout_total = (WC()->cart) ? WC()->cart->get_totals()['total'] : "0";
+        $merchantId = sprintf("&merchantId=%s",$this->getMerchandId());
         if (($this->currentConfig->getDisplayName() == 'Humm')) {
             $widget_type = 'price-info';
             $merchant_type = "&" . $this->settings['merchant_type'];
             if ($merchant_type == '&both') {
                 $merchant_type = '';
             }
-            $this->description = __('<div id="checkout_method_humm_anchor"></div><script src="https://widgets.shophumm.' . $country_domain . '/content/scripts/' . $widget_type . '.js?used_in=checkout&productPrice=' . $checkout_total . '&element=%23checkout_method_humm_anchor' . $merchant_type . '"></script>', 'WooCommerce');
+            $this->description = __('<div id="checkout_method_humm_anchor"></div><script src="https://bpi.humm-au.com/au/content/scripts/price-info_sync.js'.'?productPrice='.$checkout_total.'&element=%23checkout_method_humm_anchor'.$merchantId.$merchant_type.'"></script>', 'WooCommerce');
         }
         echo $this->description;
 
