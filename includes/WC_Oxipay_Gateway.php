@@ -158,16 +158,20 @@ class WC_Oxipay_Gateway extends WC_Flexi_Gateway_Oxipay
     function add_price_widget_cart()
     {
         global $woocommerce;
-        $ec_identity = 'little';
         if ($this->settings['enabled'] == 'yes' && isset($this->settings['cart_widget']) && $this->settings['cart_widget'] == 'yes') {
             $threshold_price = $this->getThreshold();
+            $merchantId = sprintf("&merchantId=%s",$this->getMerchandId());
+            $merchant_type = "&" . $this->settings['merchant_type'];
             $cart_total = $woocommerce->cart->total;
             if (is_cart()) {
                 if ($this->settings['country'] == 'AU') {
-                    $ec_pattern = sprintf("%s%s%s%s", '<script src =" https://widgets.shophumm.com.au/content/scripts/price-info.js?productPrice=', $cart_total, 'pattern', '"></script>');
-                    if (floatval($cart_total) >= floatval($threshold_price))
-                        $ec_identity = 'big';
-                    echo str_replace('pattern', self::$big_small_flag[$ec_identity], $ec_pattern);
+                    $ec_pattern = sprintf("%s%s%s", '<script src =" https://bpi.humm-au.com/au/content/scripts/price-info_sync.js?productPrice=', $cart_total, $merchantId);
+                    if ($merchant_type !== '&both')
+                        $ec_pattern = sprintf("%s%s%s",$ec_pattern,$merchant_type,'"></script>');
+                    else {
+                        $ec_pattern = sprintf("%s%s", $ec_pattern, '"></script>');
+                    }
+                    echo $ec_pattern;
                 }
                 else if ( $this->settings['country'] == 'NZ') {
                     if (floatval($cart_total) <= floatval($threshold_price)) {
