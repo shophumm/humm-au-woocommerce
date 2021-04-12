@@ -49,6 +49,12 @@ https://shophumm.co.nz
 
 == Changelog ==
 
+==2.2.0=  April  2021
+
+add BT widget and Widget automation for different merchants
+
+update merchant type for merchants to show LT and BT seperately
+
 
 ==2.1.1=  April  2021
 
