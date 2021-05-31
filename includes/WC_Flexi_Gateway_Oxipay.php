@@ -588,6 +588,8 @@ abstract class WC_Flexi_Gateway_Oxipay extends WC_Payment_Gateway
 
     function display_min_max_filter($available_gateways)
     {
+        if (!isset(WC()->cart)) return $available_gateways;
+        
         $minimum = $this->getMinPrice();
         $maximum = $this->getMaxPrice();
         if (($minimum != 0 && WC()->cart->total < $minimum) || ($maximum != 0 && WC()->cart->total > $maximum)) {
